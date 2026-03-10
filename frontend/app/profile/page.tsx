@@ -17,10 +17,8 @@ import {
   LogoutRounded,
   PersonRounded,
   LocalHospitalRounded,
-<<<<<<< HEAD
-=======
+
   CalendarMonthRounded,
->>>>>>> f0ef2d6 (first upload)
 } from '@mui/icons-material';
 import api from '@/lib/api';
 
@@ -141,9 +139,7 @@ export default function ProfilePage() {
               value={profile?.is_active ? '✅ ใช้งานอยู่' : '❌ ปิดใช้งาน'}
             />
           </Box>
-<<<<<<< HEAD
 
-=======
           {/* 👇 เพิ่มปุ่มจัดการนัดหมาย (สีเขียว) ตรงนี้ 👇 */}
           <Button
             variant="contained"
@@ -171,7 +167,6 @@ export default function ProfilePage() {
             จัดการนัดหมาย
           </Button>
           {/* 👆 สิ้นสุดปุ่มใหม่ 👆 */}
->>>>>>> f0ef2d6 (first upload)
           <Button
             variant="contained"
             fullWidth
