@@ -998,10 +998,10 @@ function formatDrugLabel(drug: DrugOption) {
 function formatCurrency(value: string | number | null | undefined) {
   const numeric = Number(value ?? 0);
   return Number.isFinite(numeric)
-    ? new Intl.NumberFormat("en-US", {
+    ? new Intl.NumberFormat("th-TH", {
         style: "currency",
-        currency: "USD",
+        currency: "THB",
         minimumFractionDigits: 2,
       }).format(numeric)
-    : "$0.00";
+    : "฿0.00";
 }
