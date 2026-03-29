@@ -9,6 +9,7 @@ import {
   Chip,
   Divider,
   Paper,
+  Skeleton,
   Stack,
   Typography,
 } from '@mui/material';
@@ -392,6 +393,72 @@ export const cardSx: SxProps<Theme> = {
   border: '1px solid rgba(200, 205, 182, 0.22)',
   boxShadow: '0 16px 32px rgba(108, 125, 90, 0.08)',
 };
+
+export function PageSkeleton() {
+  return (
+    <Box
+      sx={{
+        minHeight: '100vh',
+        px: { xs: 1, md: 1.25 },
+        py: { xs: 1, md: 1.25 },
+        position: 'relative',
+        overflow: 'hidden',
+        '&::before': {
+          content: '""',
+          position: 'fixed',
+          inset: 0,
+          pointerEvents: 'none',
+          background:
+            'radial-gradient(circle at 0% 0%, rgba(164, 188, 140, 0.24), transparent 28%), radial-gradient(circle at 100% 0%, rgba(206, 220, 181, 0.22), transparent 25%), radial-gradient(circle at 100% 100%, rgba(219, 198, 152, 0.2), transparent 24%)',
+        },
+      }}
+    >
+      <Box
+        sx={{
+          maxWidth: 1760,
+          mx: 'auto',
+          position: 'relative',
+          minHeight: { lg: 'calc(100vh - 20px)' },
+          p: { xs: 1, lg: 1.1 },
+          borderRadius: { xs: '30px', lg: '28px' },
+          background: 'linear-gradient(180deg, rgba(10, 14, 11, 0.98) 0%, rgba(20, 28, 22, 0.98) 100%)',
+          border: '1px solid rgba(84, 106, 84, 0.18)',
+          display: 'grid',
+          gridTemplateColumns: { xs: '1fr', lg: '276px minmax(0, 1fr)' },
+          gap: { xs: 1, lg: 0.9 },
+        }}
+      >
+        {/* Sidebar skeleton */}
+        <Box sx={{ p: { xs: 2, md: 2.25 }, display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+          <Skeleton variant="rounded" height={64} sx={{ borderRadius: '22px', bgcolor: 'rgba(255,255,255,0.06)' }} />
+          <Stack spacing={1} sx={{ mt: 1.5 }}>
+            {[...Array(6)].map((_, i) => (
+              <Skeleton key={i} variant="rounded" height={46} sx={{ borderRadius: '16px', bgcolor: 'rgba(255,255,255,0.04)' }} />
+            ))}
+          </Stack>
+        </Box>
+        {/* Content skeleton */}
+        <Box
+          sx={{
+            p: { xs: 2, md: 3 },
+            borderRadius: { xs: '24px', lg: '20px' },
+            background: 'rgba(240, 242, 235, 0.97)',
+          }}
+        >
+          <Skeleton variant="text" width="40%" height={40} sx={{ mb: 1 }} />
+          <Skeleton variant="text" width="60%" height={24} sx={{ mb: 3 }} />
+          <Box display="grid" gridTemplateColumns={{ xs: '1fr', md: 'repeat(4, 1fr)' }} gap={2} mb={3}>
+            {[...Array(4)].map((_, i) => (
+              <Skeleton key={i} variant="rounded" height={100} sx={{ borderRadius: '16px' }} />
+            ))}
+          </Box>
+          <Skeleton variant="rounded" height={200} sx={{ borderRadius: '16px', mb: 2 }} />
+          <Skeleton variant="rounded" height={200} sx={{ borderRadius: '16px' }} />
+        </Box>
+      </Box>
+    </Box>
+  );
+}
 
 function navIcon(label: string) {
   const normalized = label.toLowerCase();

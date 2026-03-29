@@ -1,16 +1,10 @@
 import { Suspense } from "react";
-import { Box, CircularProgress } from "@mui/material";
+import { PageSkeleton } from "@/app/components/app-shell";
 import StaffVisitsClient from "./staff-visits-client";
 
 export default function StaffVisitsPage() {
   return (
-    <Suspense
-      fallback={
-        <Box minHeight="100vh" display="grid" sx={{ placeItems: "center" }}>
-          <CircularProgress />
-        </Box>
-      }
-    >
+    <Suspense fallback={<PageSkeleton />}>
       <StaffVisitsClient />
     </Suspense>
   );

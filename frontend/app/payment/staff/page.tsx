@@ -7,13 +7,12 @@ import {
   Box,
   Button,
   Chip,
-  CircularProgress,
   Link,
   TableCell,
   TableRow,
   TextField,
 } from '@mui/material';
-import { AppShell, StatCard } from '@/app/components/app-shell';
+import { AppShell, PageSkeleton, StatCard } from '@/app/components/app-shell';
 import { PaginatedTableCard } from '@/app/components/paginated-table-card';
 import { SearchSettingsCard } from '@/app/components/search-settings-card';
 import { staffNav } from '@/app/components/navigation';
@@ -97,6 +96,10 @@ export default function StaffPaymentPage() {
     }
   };
 
+  if (loading) {
+    return <PageSkeleton />;
+  }
+
   return (
     <AppShell
       title="Payment Verification"
@@ -128,12 +131,7 @@ export default function StaffPaymentPage() {
         />
       </Box>
 
-      {loading ? (
-        <Box display="grid" minHeight={320} sx={{ placeItems: 'center' }}>
-          <CircularProgress />
-        </Box>
-      ) : (
-        <>
+      <>
           <SearchSettingsCard description="Search by child, invoice, payment method, or payment id before verifying the row you need.">
             <Box
               display="grid"
@@ -227,7 +225,6 @@ export default function StaffPaymentPage() {
             />
           </Box>
         </>
-      )}
     </AppShell>
   );
 }

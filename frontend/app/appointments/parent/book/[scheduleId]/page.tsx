@@ -6,13 +6,12 @@ import {
   Alert,
   Box,
   Button,
-  CircularProgress,
   MenuItem,
   Stack,
   TextField,
   Typography,
 } from '@mui/material';
-import { AppShell, DashboardCard } from '@/app/components/app-shell';
+import { AppShell, DashboardCard, PageSkeleton } from '@/app/components/app-shell';
 import { parentNav } from '@/app/components/navigation';
 import api from '@/lib/api';
 import type { Profile } from '@/lib/access';
@@ -114,6 +113,10 @@ export default function BookAppointmentPage() {
     }
   };
 
+  if (loading) {
+    return <PageSkeleton />;
+  }
+
   return (
     <AppShell
       title="Confirm Booking"
@@ -140,12 +143,7 @@ export default function BookAppointmentPage() {
     >
       {error && <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>}
 
-      {loading ? (
-        <Box display="grid" minHeight={320} sx={{ placeItems: 'center' }}>
-          <CircularProgress />
-        </Box>
-      ) : (
-        <Box display="grid" gridTemplateColumns={{ xs: '1fr', xl: '1fr 0.95fr' }} gap={2.5}>
+      <Box display="grid" gridTemplateColumns={{ xs: '1fr', xl: '1fr 0.95fr' }} gap={2.5}>
           <DashboardCard>
             <Typography variant="h5">Selected schedule</Typography>
             <Stack spacing={1.25} sx={{ mt: 2.25 }}>
@@ -205,7 +203,6 @@ export default function BookAppointmentPage() {
             </Stack>
           </DashboardCard>
         </Box>
-      )}
     </AppShell>
   );
 }

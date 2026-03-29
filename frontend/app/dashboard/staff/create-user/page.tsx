@@ -6,13 +6,12 @@ import {
   Alert,
   Box,
   Button,
-  CircularProgress,
   MenuItem,
   Stack,
   TextField,
 } from "@mui/material";
 import type { AxiosError } from "axios";
-import { AppShell, DashboardCard } from "@/app/components/app-shell";
+import { AppShell, DashboardCard, PageSkeleton } from "@/app/components/app-shell";
 import { staffNav } from "@/app/components/navigation";
 import api from "@/lib/api";
 import { hasRole, type Profile } from "@/lib/access";
@@ -146,11 +145,7 @@ export default function StaffCreateUserPage() {
   };
 
   if (loading) {
-    return (
-      <Box minHeight="100vh" display="grid" sx={{ placeItems: "center" }}>
-        <CircularProgress />
-      </Box>
-    );
+    return <PageSkeleton />;
   }
 
   return (

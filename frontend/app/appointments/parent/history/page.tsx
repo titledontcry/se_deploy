@@ -7,14 +7,13 @@ import {
   Box,
   Button,
   Chip,
-  CircularProgress,
   MenuItem,
   Pagination,
   Stack,
   TextField,
   Typography,
 } from '@mui/material';
-import { AppShell, DashboardCard, StatCard } from '@/app/components/app-shell';
+import { AppShell, DashboardCard, PageSkeleton, StatCard } from '@/app/components/app-shell';
 import { parentNav } from '@/app/components/navigation';
 import api from '@/lib/api';
 import type { Profile } from '@/lib/access';
@@ -109,6 +108,10 @@ export default function AppointmentHistoryPage() {
     }
   };
 
+  if (loading) {
+    return <PageSkeleton />;
+  }
+
   return (
     <AppShell
       title="Appointment History"
@@ -149,12 +152,7 @@ export default function AppointmentHistoryPage() {
         <StatCard label="Cancelled" value={appointments.filter((item) => item.status === 'cancelled').length} />
       </Box>
 
-      {loading ? (
-        <Box display="grid" minHeight={320} sx={{ placeItems: 'center' }}>
-          <CircularProgress />
-        </Box>
-      ) : (
-        <Stack spacing={2.5}>
+      <Stack spacing={2.5}>
           <DashboardCard>
             <Typography variant="h5">Search settings</Typography>
             <Box display="grid" gridTemplateColumns={{ xs: '1fr', md: '1fr 180px' }} gap={1.5} sx={{ mt: 2 }}>
@@ -254,7 +252,6 @@ export default function AppointmentHistoryPage() {
             </Box>
           )}
         </Stack>
-      )}
     </AppShell>
   );
 }

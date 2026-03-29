@@ -7,13 +7,12 @@ import {
   Alert,
   Box,
   Button,
-  CircularProgress,
   MenuItem,
   TableCell,
   TableRow,
   TextField,
 } from "@mui/material";
-import { AppShell, StatCard } from "@/app/components/app-shell";
+import { AppShell, PageSkeleton, StatCard } from "@/app/components/app-shell";
 import { staffNav } from "@/app/components/navigation";
 import { PaginatedTableCard } from "@/app/components/paginated-table-card";
 import { SearchSettingsCard } from "@/app/components/search-settings-card";
@@ -186,11 +185,7 @@ export default function StaffAppointmentsPage() {
   };
 
   if (loading) {
-    return (
-      <Box minHeight="100vh" display="grid" sx={{ placeItems: "center" }}>
-        <CircularProgress />
-      </Box>
-    );
+    return <PageSkeleton />;
   }
 
   return (

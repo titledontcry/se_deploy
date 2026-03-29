@@ -7,7 +7,6 @@ import {
   Box,
   Button,
   Chip,
-  CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
@@ -18,7 +17,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import { AppShell, StatCard } from '@/app/components/app-shell';
+import { AppShell, PageSkeleton, StatCard } from '@/app/components/app-shell';
 import { PaginatedTableCard } from '@/app/components/paginated-table-card';
 import { SearchSettingsCard } from '@/app/components/search-settings-card';
 import { parentNav } from '@/app/components/navigation';
@@ -258,6 +257,10 @@ export default function ParentPaymentPage() {
     }
   };
 
+  if (loading) {
+    return <PageSkeleton />;
+  }
+
   return (
     <AppShell
       title="Payments"
@@ -287,12 +290,7 @@ export default function ParentPaymentPage() {
         <StatCard label="Pending" value={payments.filter((payment) => payment.status === 'pending').length} helper="Waiting for approval" />
       </Box>
 
-      {loading ? (
-        <Box display="grid" minHeight={320} sx={{ placeItems: 'center' }}>
-          <CircularProgress />
-        </Box>
-      ) : (
-        <>
+      <>
           <SearchSettingsCard description="Use the filters once, then review unpaid invoices and payment history from the tables below.">
             <Box display="grid" gridTemplateColumns={{ xs: '1fr', md: 'minmax(0, 1.5fr) 220px' }} gap={2}>
               <TextField
@@ -412,7 +410,6 @@ export default function ParentPaymentPage() {
             />
           </Box>
         </>
-      )}
 
       <Dialog open={payDialogOpen} onClose={handleClosePayDialog} maxWidth="sm" fullWidth>
         <DialogTitle>Payment - Invoice #{selectedInvoice?.invoice_id}</DialogTitle>

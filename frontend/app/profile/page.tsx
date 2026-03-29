@@ -6,11 +6,10 @@ import {
   Box,
   Button,
   Chip,
-  CircularProgress,
   Stack,
   Typography,
 } from "@mui/material";
-import { AppShell, DashboardCard } from "@/app/components/app-shell";
+import { AppShell, DashboardCard, PageSkeleton } from "@/app/components/app-shell";
 import { parentNav, staffNav } from "@/app/components/navigation";
 import api from "@/lib/api";
 import {
@@ -48,11 +47,7 @@ export default function ProfilePage() {
   };
 
   if (loading) {
-    return (
-      <Box minHeight="100vh" display="grid" sx={{ placeItems: "center" }}>
-        <CircularProgress />
-      </Box>
-    );
+    return <PageSkeleton />;
   }
 
   const navItems = profile?.user_type === "parent" ? parentNav() : staffNav(profile);

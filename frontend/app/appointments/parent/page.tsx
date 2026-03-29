@@ -7,7 +7,6 @@ import {
   Box,
   Button,
   Chip,
-  CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
@@ -17,7 +16,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import { AppShell, DashboardCard, StatCard } from '@/app/components/app-shell';
+import { AppShell, DashboardCard, PageSkeleton, StatCard } from '@/app/components/app-shell';
 import { parentNav } from '@/app/components/navigation';
 import api from '@/lib/api';
 import type { Profile } from '@/lib/access';
@@ -182,6 +181,10 @@ export default function ParentAppointmentsPage() {
     }
   };
 
+  if (loading) {
+    return <PageSkeleton />;
+  }
+
   return (
     <AppShell
       title="Appointment Booking"
@@ -221,12 +224,7 @@ export default function ParentAppointmentsPage() {
         <StatCard label="This month" value={filteredSchedules.filter((item) => isSameUtcMonth(new Date(item.work_date || ''), anchor)).length} helper="Slots inside the monthly calendar" />
       </Box>
 
-      {loading ? (
-        <Box display="grid" minHeight={320} sx={{ placeItems: 'center' }}>
-          <CircularProgress />
-        </Box>
-      ) : (
-        <Stack spacing={2.5}>
+      <Stack spacing={2.5}>
           <DashboardCard>
             <Box display="grid" gridTemplateColumns={{ xs: '1fr', md: '220px minmax(0, 1fr)' }} gap={2}>
               <TextField
@@ -436,7 +434,6 @@ export default function ParentAppointmentsPage() {
             </Box>
           </DashboardCard>
         </Stack>
-      )}
 
       <Dialog open={detailOpen} onClose={() => setDetailOpen(false)} maxWidth="sm" fullWidth>
         <DialogTitle>Slot details</DialogTitle>

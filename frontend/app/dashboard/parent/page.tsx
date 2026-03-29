@@ -7,12 +7,11 @@ import {
   Box,
   Button,
   Chip,
-  CircularProgress,
   LinearProgress,
   Stack,
   Typography,
 } from "@mui/material";
-import { AppShell, DashboardCard, StatCard } from "@/app/components/app-shell";
+import { AppShell, DashboardCard, PageSkeleton, StatCard } from "@/app/components/app-shell";
 import { parentNav } from "@/app/components/navigation";
 import api from "@/lib/api";
 import type { Profile } from "@/lib/access";
@@ -150,11 +149,7 @@ export default function ParentDashboardPage() {
   );
 
   if (loading) {
-    return (
-      <Box minHeight="100vh" display="grid" sx={{ placeItems: "center" }}>
-        <CircularProgress />
-      </Box>
-    );
+    return <PageSkeleton />;
   }
 
   return (

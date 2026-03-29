@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { Alert, Box, Button, Chip, CircularProgress, Stack, Typography } from "@mui/material";
-import { AppShell, DashboardCard, StatCard } from "@/app/components/app-shell";
+import { Alert, Box, Button, Chip, Stack, Typography } from "@mui/material";
+import { AppShell, DashboardCard, PageSkeleton, StatCard } from "@/app/components/app-shell";
 import { staffNav } from "@/app/components/navigation";
 import api from "@/lib/api";
 import { formatDate, titleCase } from "@/lib/format";
@@ -66,11 +66,7 @@ export default function StaffRoleDashboardPage() {
   }, [params.roleName, router]);
 
   if (loading) {
-    return (
-      <Box minHeight="100vh" display="grid" sx={{ placeItems: "center" }}>
-        <CircularProgress />
-      </Box>
-    );
+    return <PageSkeleton />;
   }
 
   return (

@@ -6,14 +6,13 @@ import {
   Alert,
   Box,
   Button,
-  CircularProgress,
   Pagination,
   Stack,
   TextField,
   Typography,
 } from "@mui/material";
 import type { AxiosError } from "axios";
-import { AppShell, DashboardCard, StatCard } from "@/app/components/app-shell";
+import { AppShell, DashboardCard, PageSkeleton, StatCard } from "@/app/components/app-shell";
 import { staffNav } from "@/app/components/navigation";
 import api from "@/lib/api";
 import { formatDate } from "@/lib/format";
@@ -94,11 +93,7 @@ export default function PastAppointmentsPage() {
   useEffect(() => { load(); }, [load]);
 
   if (loading) {
-    return (
-      <Box minHeight="100vh" display="grid" sx={{ placeItems: "center" }}>
-        <CircularProgress />
-      </Box>
-    );
+    return <PageSkeleton />;
   }
 
   return (

@@ -8,18 +8,18 @@ import {
   Box,
   Button,
   Chip,
-  CircularProgress,
   FormControl,
   FormControlLabel,
   FormLabel,
   MenuItem,
   Radio,
   RadioGroup,
+  Skeleton,
   Stack,
   TextField,
   Typography,
 } from "@mui/material";
-import { AppShell, DashboardCard, StatCard } from "@/app/components/app-shell";
+import { AppShell, DashboardCard, PageSkeleton, StatCard } from "@/app/components/app-shell";
 import { parentNav } from "@/app/components/navigation";
 import api from "@/lib/api";
 import type { Profile } from "@/lib/access";
@@ -244,11 +244,7 @@ export default function ParentAssessmentsPage() {
   };
 
   if (loading) {
-    return (
-      <Box minHeight="100vh" display="grid" sx={{ placeItems: "center" }}>
-        <CircularProgress />
-      </Box>
-    );
+    return <PageSkeleton />;
   }
 
   return (
@@ -353,13 +349,11 @@ export default function ParentAssessmentsPage() {
               </TextField>
 
               {templateLoading ? (
-                <Box
-                  minHeight={200}
-                  display="grid"
-                  sx={{ placeItems: "center" }}
-                >
-                  <CircularProgress />
-                </Box>
+                <Stack spacing={1.5}>
+                  <Skeleton variant="rounded" height={80} sx={{ borderRadius: 2 }} />
+                  <Skeleton variant="rounded" height={80} sx={{ borderRadius: 2 }} />
+                  <Skeleton variant="rounded" height={80} sx={{ borderRadius: 2 }} />
+                </Stack>
               ) : (
                 template?.questions.map((question, index) => (
                   <FormControl
