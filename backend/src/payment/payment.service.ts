@@ -143,9 +143,10 @@ export class PaymentService {
       (p) => p.status === payment_status.pending,
     );
     if (existingPending) {
-      throw new BadRequestException(
-        'There is already a pending payment for this invoice.',
-      );
+      await this.prisma.payment.update({
+        where: { payment_id: existingPending.payment_id },
+        data: { deleted_at: new Date() },
+      });
     }
 
     const amountSatang = Math.round(Number(invoice.total_amount ?? 0) * 100);
