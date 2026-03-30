@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Alert,
@@ -68,6 +68,7 @@ export default function ParentPaymentPage() {
   const [paymentSuccess, setPaymentSuccess] = useState(false);
   const [receiptOpen, setReceiptOpen] = useState(false);
   const [receiptData, setReceiptData] = useState<ReceiptData | null>(null);
+  const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const fetchData = async () => {
     setLoading(true);
@@ -144,6 +145,33 @@ export default function ParentPaymentPage() {
     setPayDialogOpen(true);
   };
 
+  useEffect(() => {
+    if (!omiseChargeId || !payDialogOpen) return;
+
+    pollingRef.current = setInterval(async () => {
+      try {
+        const { data } = await api.get<{ status: string }>(`/payment/charge-status/${omiseChargeId}`);
+        if (data.status === 'successful') {
+          clearInterval(pollingRef.current!);
+          pollingRef.current = null;
+          setPayDialogOpen(false);
+          setOmiseQrUrl(null);
+          setPaymentSuccess(true);
+          void fetchData();
+        }
+      } catch {
+        // ignore poll errors
+      }
+    }, 3000);
+
+    return () => {
+      if (pollingRef.current) {
+        clearInterval(pollingRef.current);
+        pollingRef.current = null;
+      }
+    };
+  }, [omiseChargeId, payDialogOpen]);
+
   const handleGenerateQr = async () => {
     if (!selectedInvoice) return;
     setSubmitting(true);
@@ -161,48 +189,12 @@ export default function ParentPaymentPage() {
     }
   };
 
-  const handleClosePayDialog = async () => {
-    setPayDialogOpen(false);
-    if (omiseChargeId && selectedInvoice) {
-      try {
-        const { data: chargeData } = await api.get<{ status: string }>(`/payment/charge-status/${omiseChargeId}`);
-        if (chargeData.status === 'successful') {
-          await fetchData();
-
-          // fetch invoice + visit data สำหรับใบเสร็จ
-          try {
-            const { data: invoiceData } = await api.get<any>(`/invoice/visit/${selectedInvoice.visit_id}`);
-            const { data: visitData } = await api.get<any>(`/visit/${selectedInvoice.visit_id}`);
-            const { data: paymentData } = await api.get<any>(`/payment/invoice/${selectedInvoice.invoice_id}`);
-
-            const latestPayment = paymentData.payments?.[0];
-            const child = visitData?.appointment?.patient;
-            const doctor = visitData?.appointment?.schedule?.staff;
-
-            setReceiptData({
-              payment_id: latestPayment?.payment_id ?? 0,
-              payment_date: latestPayment?.payment_date ?? new Date().toISOString(),
-              invoice_id: invoiceData.invoice_id,
-              total_amount: Number(invoiceData.total_amount ?? 0),
-              child_name: child ? `${child.first_name} ${child.last_name}` : '-',
-              visit_date: visitData?.visit_date ?? null,
-              doctor_name: doctor ? `${doctor.first_name} ${doctor.last_name}` : null,
-              items: (invoiceData.items ?? []).map((item: any) => ({
-                description: item.description,
-                qty: item.qty,
-                unit_price: Number(item.unit_price ?? 0),
-                amount: Number(item.amount ?? 0),
-              })),
-            });
-            setReceiptOpen(true);
-          } catch {
-            setPaymentSuccess(true);
-          }
-        }
-      } catch {
-        // ไม่แสดง error ถ้าเช็ค status ไม่ได้
-      }
+  const handleClosePayDialog = () => {
+    if (pollingRef.current) {
+      clearInterval(pollingRef.current);
+      pollingRef.current = null;
     }
+    setPayDialogOpen(false);
   };
 
   const handleViewReceipt = async (payment: Payment) => {
@@ -448,19 +440,15 @@ export default function ParentPaymentPage() {
         </DialogActions>
       </Dialog>
 
-      <Dialog open={paymentSuccess} onClose={() => setPaymentSuccess(false)} maxWidth="xs" fullWidth>
+      <Dialog open={paymentSuccess} maxWidth="xs" fullWidth>
         <DialogContent>
           <Box textAlign="center" sx={{ py: 3 }}>
             <Typography variant="h2" mb={1}>✓</Typography>
-            <Typography variant="h6" fontWeight={600} mb={1}>ชำระเงินเสร็จแล้ว</Typography>
-            <Typography variant="body2" color="text.secondary">
-              การชำระเงินของคุณได้รับการยืนยันแล้ว
-            </Typography>
+            <Typography variant="h6" fontWeight={600} mb={1}>ชำระเงินสำเร็จ</Typography>
           </Box>
         </DialogContent>
         <DialogActions sx={{ justifyContent: 'center', pb: 3 }}>
-          <Button onClick={() => setPaymentSuccess(false)}>ปิด</Button>
-          <Button variant="contained" onClick={() => { setPaymentSuccess(false); setReceiptOpen(true); }}>ดูใบเสร็จ</Button>
+          <Button variant="contained" onClick={() => setPaymentSuccess(false)}>ตกลง</Button>
         </DialogActions>
       </Dialog>
 

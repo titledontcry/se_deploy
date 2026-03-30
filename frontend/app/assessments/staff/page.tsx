@@ -1,13 +1,12 @@
 "use client";
 
 import type { AxiosError } from "axios";
-import { FormEvent, useCallback, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   Alert,
   Box,
   Button,
-  Chip,
   Divider,
   MenuItem,
   Stack,
@@ -18,7 +17,7 @@ import { AppShell, DashboardCard, PageSkeleton, StatCard } from "@/app/component
 import { staffNav } from "@/app/components/navigation";
 import api from "@/lib/api";
 import type { Profile } from "@/lib/access";
-import { formatDate, titleCase } from "@/lib/format";
+import { titleCase } from "@/lib/format";
 
 type TemplateSummary = {
   assessment_id: number;
@@ -131,11 +130,11 @@ function createEmptyTemplate(): TemplateFormState {
 
 export default function StaffAssessmentsPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [dashboard, setDashboard] = useState<StaffAssessmentDashboard | null>(
     null,
   );
-  const [templates, setTemplates] = useState<TemplateSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -157,16 +156,13 @@ export default function StaffAssessmentsPage() {
       const [
         { data: profileData },
         { data: dashboardData },
-        { data: templateData },
       ] = await Promise.all([
         api.get<Profile>("/auth/profile"),
         api.get<StaffAssessmentDashboard>("/assessment/dashboard"),
-        api.get<TemplateSummary[]>("/assessment/templates"),
       ]);
 
       setProfile(profileData);
       setDashboard(dashboardData);
-      setTemplates(templateData);
     } catch (err: unknown) {
       const error = err as AxiosError<ApiErrorResponse>;
       if (error.response?.status === 401) {
@@ -183,6 +179,11 @@ export default function StaffAssessmentsPage() {
   useEffect(() => {
     void load();
   }, [load]);
+
+  useEffect(() => {
+    const editId = searchParams.get("edit");
+    if (editId) void handleEdit(Number(editId));
+  }, [searchParams]);
 
   const resetForm = () => {
     setEditingId(null);
@@ -220,7 +221,7 @@ export default function StaffAssessmentsPage() {
     }
   };
 
-  const handleSubmit = async (event: FormEvent) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setSaving(true);
     setError("");
@@ -241,23 +242,6 @@ export default function StaffAssessmentsPage() {
       setError(extractMessage(err, "Unable to save assessment template"));
     } finally {
       setSaving(false);
-    }
-  };
-
-  const handleDelete = async (assessmentId: number) => {
-    if (!window.confirm("Delete this assessment template?")) {
-      return;
-    }
-
-    try {
-      await api.delete(`/assessment/templates/${assessmentId}`);
-      if (editingId === assessmentId) {
-        resetForm();
-      }
-      setSuccess("Assessment template deleted");
-      await load();
-    } catch (err: unknown) {
-      setError(extractMessage(err, "Unable to delete assessment template"));
     }
   };
 
@@ -348,6 +332,18 @@ export default function StaffAssessmentsPage() {
           <Button variant="outlined" onClick={resetForm}>
             New template
           </Button>
+          <Button
+            variant="outlined"
+            onClick={() => router.push("/assessments/staff/templates")}
+          >
+            Template library
+          </Button>
+          <Button
+            variant="outlined"
+            onClick={() => router.push("/assessments/staff/submissions")}
+          >
+            Recent submissions
+          </Button>
         </>
       }
     >
@@ -382,12 +378,7 @@ export default function StaffAssessmentsPage() {
         />
       </Box>
 
-      <Box
-        display="grid"
-        gridTemplateColumns={{ xs: "1fr", xl: "1.15fr 0.85fr" }}
-        gap={2.5}
-      >
-        <DashboardCard>
+      <DashboardCard>
           <Box
             display="flex"
             justifyContent="space-between"
@@ -699,103 +690,6 @@ export default function StaffAssessmentsPage() {
             </Stack>
           </Box>
         </DashboardCard>
-
-        <Stack spacing={2.5}>
-          <DashboardCard>
-            <Typography variant="h5">Template library</Typography>
-            <Stack spacing={1.5} sx={{ mt: 2.25 }}>
-              {templates.map((template) => (
-                <Box
-                  key={template.assessment_id}
-                  sx={{
-                    p: 2,
-                    borderRadius: 4,
-                    background: "rgba(255,255,255,0.56)",
-                    border: "1px solid rgba(122, 156, 156, 0.14)",
-                  }}
-                >
-                  <Typography sx={{ fontWeight: 700 }}>
-                    {template.name || "-"}
-                  </Typography>
-                  <Typography color="text.secondary" sx={{ mt: 0.5 }}>
-                    {template.questionCount} questions | {template.resultCount}{" "}
-                    results
-                  </Typography>
-                  <Typography color="text.secondary" sx={{ mt: 0.5 }}>
-                    Owner: {template.creator?.first_name || "-"}{" "}
-                    {template.creator?.last_name || ""}
-                  </Typography>
-                  <Box display="flex" gap={1} flexWrap="wrap" sx={{ mt: 1.5 }}>
-                    <Button
-                      variant="outlined"
-                      onClick={() => handleEdit(template.assessment_id)}
-                      disabled={template.resultCount > 0}
-                    >
-                      Edit
-                    </Button>
-                    <Button
-                      variant="outlined"
-                      color="error"
-                      onClick={() => handleDelete(template.assessment_id)}
-                      disabled={template.resultCount > 0}
-                    >
-                      Delete
-                    </Button>
-                    {template.resultCount > 0 && (
-                      <Chip size="small" label="Locked after submissions" />
-                    )}
-                  </Box>
-                </Box>
-              ))}
-              {templates.length === 0 && (
-                <Typography color="text.secondary">
-                  No assessment templates yet.
-                </Typography>
-              )}
-            </Stack>
-          </DashboardCard>
-
-          <DashboardCard>
-            <Typography variant="h5">Recent submissions</Typography>
-            <Stack spacing={1.5} sx={{ mt: 2.25 }}>
-              {dashboard?.recentResults.map((result) => (
-                <Box
-                  key={result.child_assessment_id}
-                  sx={{
-                    p: 2,
-                    borderRadius: 4,
-                    background: "rgba(255,255,255,0.56)",
-                    border: "1px solid rgba(122, 156, 156, 0.14)",
-                  }}
-                >
-                  <Typography sx={{ fontWeight: 700 }}>
-                    {result.child?.first_name || "-"}{" "}
-                    {result.child?.last_name || ""}
-                  </Typography>
-                  <Typography color="text.secondary" sx={{ mt: 0.5 }}>
-                    {result.assessment?.name || "-"} |{" "}
-                    {formatDate(result.assessed_at, "en-US")}
-                  </Typography>
-                  <Box display="flex" gap={1} flexWrap="wrap" sx={{ mt: 1.25 }}>
-                    <Chip label={`Score ${result.total_score ?? 0}`} />
-                    {result.band?.severity_level && (
-                      <Chip
-                        label={titleCase(result.band.severity_level)}
-                        color="primary"
-                      />
-                    )}
-                  </Box>
-                </Box>
-              ))}
-              {dashboard?.recentResults.length === 0 && (
-                <Typography color="text.secondary">
-                  No submitted assessments yet.
-                </Typography>
-              )}
-            </Stack>
-          </DashboardCard>
-        </Stack>
-      </Box>
     </AppShell>
   );
 }
