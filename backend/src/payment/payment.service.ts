@@ -151,19 +151,31 @@ export class PaymentService {
 
     const amountSatang = Math.round(Number(invoice.total_amount ?? 0) * 100);
 
-    const source = await this.omise.sources.create({
-      type: 'promptpay',
-      amount: amountSatang,
-      currency: 'THB',
-    });
+    if (amountSatang < 2000) {
+      throw new BadRequestException('Invoice amount must be at least 20 THB to generate a QR code');
+    }
 
-    const charge = await this.omise.charges.create({
-      amount: amountSatang,
-      currency: 'THB',
-      source: source.id,
-      return_uri: `${process.env.FRONTEND_URL}/payment/parent`,
-      metadata: { invoice_id: dto.invoiceId },
-    });
+    let source: any;
+    let charge: any;
+    try {
+      source = await this.omise.sources.create({
+        type: 'promptpay',
+        amount: amountSatang,
+        currency: 'THB',
+      });
+
+      charge = await this.omise.charges.create({
+        amount: amountSatang,
+        currency: 'THB',
+        source: source.id,
+        return_uri: `${process.env.FRONTEND_URL}/payment/parent`,
+        metadata: { invoice_id: dto.invoiceId },
+      });
+    } catch (err: any) {
+      throw new BadRequestException(
+        err?.message ?? 'Failed to create payment charge. Please try again.',
+      );
+    }
 
     await this.prisma.payment.create({
       data: {
